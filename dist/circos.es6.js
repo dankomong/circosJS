@@ -8359,13 +8359,12 @@ function registerHighlight(track, instance, element, trackParams) {
   track.dispatch.on('mouseover.highlight', function (d) {
     instance.svg.selectAll("path.chord").attr("opacity", 0.1);
     instance.svg.selectAll("g.cs-layout").selectAll("g").attr("opacity", 0.1);
-
     if (d.source) {
       // User has moused over a chord
       instance.svg.selectAll("path.chord[data-source='" + d.source.id + "'][data-target='" + d.target.id + "']").attr("opacity", 0.7);
 
-      instance.svg.selectAll("g.cs-layout").selectAll("g." + d.source.id).attr("opacity", 1);
-      instance.svg.selectAll("g.cs-layout").selectAll("g." + d.target.id).attr("opacity", 1);
+      instance.svg.selectAll("g.cs-layout").selectAll("g[data-id='" + d.source.id + "']").attr("opacity", 1);
+      instance.svg.selectAll("g.cs-layout").selectAll("g[data-id='" + d.target.id + "']").attr("opacity", 1);
 
       /*instance.svg.selectAll("path.chord").sort(
         // Order this chord last so it appears on top
@@ -8381,7 +8380,14 @@ function registerHighlight(track, instance, element, trackParams) {
       instance.svg.selectAll("path.chord[data-source='" + d.block_id + "']").attr("opacity", 0.7);
       instance.svg.selectAll("path.chord[data-target='" + d.block_id + "']").attr("opacity", 0.7);
       // blocks
-      instance.svg.selectAll("g.cs-layout").selectAll("g." + d.block_id).attr("opacity", 1);
+      instance.svg.selectAll("g.cs-layout").selectAll("g[data-id='" + d.block_id + "']").attr("opacity", 1);
+      // linked blocks
+      instance.svg.selectAll("path.chord[data-target='" + d.block_id + "']").each(function (dsub, i) {
+        instance.svg.selectAll("g.cs-layout").selectAll("g[data-id='" + dsub.source.id + "']").attr("opacity", 0.7);
+      });
+      instance.svg.selectAll("path.chord[data-source='" + d.block_id + "']").each(function (dsub, i) {
+        instance.svg.selectAll("g.cs-layout").selectAll("g[data-id='" + dsub.target.id + "']").attr("opacity", 0.7);
+      });
       /*instance.svg.selectAll("path.chord").sort(
         // Put these chords on top
         function (a, b) {
@@ -14886,6 +14892,8 @@ function renderLayout(parentElement, instance) {
   var layout = parentElement.append('g').attr('class', 'cs-layout').attr('z-index', conf.zIndex).on('click', conf.onClick);
 
   var block = layout.selectAll('g').data(instance._layout.data).enter().append('g').attr('class', function (d) {
+    return d.id;
+  }).attr('data-id', function (d) {
     return d.id;
   }).attr('opacity', conf.opacity);
 

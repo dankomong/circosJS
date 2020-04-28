@@ -105,6 +105,7 @@ export default function renderLayout (parentElement, instance) {
     .enter()
     .append('g')
     .attr('class', (d) => d.id)
+    .attr('data-id', (d) => d.id)
     .attr('opacity', conf.opacity)
 
   Object.keys(conf.events).forEach((eventName) => {
